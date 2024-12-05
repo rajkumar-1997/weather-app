@@ -28,9 +28,12 @@
     "@nestjs/throttler": "^6.2.1",
     "axios": "^1.7.9",
     "cache-manager": "^5.2.3",
+    "nest-winston": "^1.9.7",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "weather_report": "file:"
+    "weather_report": "file:",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

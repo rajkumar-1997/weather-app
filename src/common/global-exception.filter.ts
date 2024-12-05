@@ -4,11 +4,18 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Inject,
+  Injectable,
 } from '@nestjs/common';
 import { AxiosError } from 'axios';
-
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+@Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -40,6 +47,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     }
 
+    this.logger.error({
+      level: 'error',
+      message: 'exception occurred',
+      status,
+      errorType,
+      exceptionDetails: {
+        message: message,
+        stack: exception instanceof Error ? exception.stack : null,
+      },
+      requestDetails: {
+        requestDetails: {
+          method: request.method,
+          url: request.url,
+          body: request?.body,
+          query: request?.query,
+        },
+      },
+    });
     // Return error response with message in the response object
     response.status(status).json({
       statusCode: status,

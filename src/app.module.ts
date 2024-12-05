@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,10 +8,14 @@ import { WeatherReportModule } from './weather-report/weather-report.module';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { WinstonModule } from 'nest-winston';
+import { winstonLoggerConfig } from './common/winston.logger';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 0, limit: 0 }]),
+    WinstonModule.forRoot(winstonLoggerConfig),
     CacheModule.register({
       isGlobal: true,
     }),
@@ -28,4 +32,8 @@ import { CacheModule } from '@nestjs/cache-manager';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
