@@ -11,6 +11,11 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { WinstonModule } from 'nest-winston';
 import { winstonLoggerConfig } from './common/winston.logger';
+import { HealthModule } from './health/health.module';
+import { HttpModule } from '@nestjs/axios';
+import { MetricsMiddleware } from './middlewares/metrics.middleware';
+import { MetricsModule } from './metrics/metrics.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -22,6 +27,9 @@ import { winstonLoggerConfig } from './common/winston.logger';
     UtilsModule,
     WeatherReportModule,
     ThirdPartyModule,
+    HealthModule,
+    HttpModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -35,5 +43,6 @@ import { winstonLoggerConfig } from './common/winston.logger';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(MetricsMiddleware).forRoutes('*');
   }
 }

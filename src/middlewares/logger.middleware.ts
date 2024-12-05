@@ -1,13 +1,14 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { NextFunction } from 'express';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
-  use(req: any, res: any, next: (error?: Error | any) => void) {
+  use(req: any, res: any, next: NextFunction) {
     const { method, originalUrl } = req;
     const start = Date.now();
 
