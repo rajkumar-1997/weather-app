@@ -7,10 +7,7 @@ export class WeatherReportController {
 
   @Get('/weather-by-ip')
   async getWeatherByIp(@Query('ip') ip: string) {
-    try {
-      const res = await this.weatherReportService.getWeatherByIp(ip);
-      console.log({ res });
-      return res;
-    } catch (error) {}
+    const res = await this.weatherReportService.getWeatherByIp(ip);
+    return res;
   }
 }

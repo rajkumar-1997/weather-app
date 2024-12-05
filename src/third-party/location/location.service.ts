@@ -7,9 +7,7 @@ export class LocationService {
     private readonly ipInfoProvider: IpInformationProvider,
   ) {}
   async getGeolocation(ip: string) {
-    try {
-      const locationData = await this.ipInfoProvider.getIpInformation(ip);
-      return locationData;
-    } catch (error) {}
+    const locationData = await this.ipInfoProvider.getIpInformation(ip);
+    return locationData;
   }
 }

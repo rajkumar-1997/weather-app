@@ -7,12 +7,10 @@ export class WeatherService {
     private readonly weatherDataProvider: WeatherDataProvider,
   ) {}
   async getWeatherInfo(latitude: number, longitude: number) {
-    try {
-      const weatherData = await this.weatherDataProvider.getCurrentWeatherData(
-        latitude,
-        longitude,
-      );
-      return weatherData;
-    } catch (error) {}
+    const weatherData = await this.weatherDataProvider.getCurrentWeatherData(
+      latitude,
+      longitude,
+    );
+    return weatherData;
   }
 }

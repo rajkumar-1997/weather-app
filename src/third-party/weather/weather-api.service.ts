@@ -7,13 +7,11 @@ export class WeatherApiService implements WeatherDataProvider {
   constructor(private readonly apiClientService: ApiClientService) {}
 
   async getCurrentWeatherData(latitude: number, longitude: number) {
-    try {
-      const params = {
-        key: process.env.WEATHER_API_KEY,
-        q: `${latitude},${longitude}`,
-      };
-      const data = await this.apiClientService.get(weatherApiUrl, {}, params);
-      return data;
-    } catch (error) {}
+    const params = {
+      key: process.env.WEATHER_API_KEY,
+      q: `${latitude},${longitude}`,
+    };
+    const data = await this.apiClientService.get(weatherApiUrl, {}, params);
+    return data;
   }
 }
