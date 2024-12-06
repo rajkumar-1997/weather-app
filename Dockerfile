@@ -1,12 +1,20 @@
+
+# Production Dockerfile
 FROM node:lts-alpine
 
+
+#Make  working directory
 WORKDIR /app
 
+# Install dependencies
 COPY package*.json ./
+RUN npm ci --only=production
 
-RUN npm install
+# Copy the build artifacts
+COPY dist ./dist
 
-COPY ./   ./
+# Expose port
+EXPOSE 3000
 
-
-CMD [ "npm","run","start" ]
+# Command to run the application
+CMD ["node", "/app/dist/main.js"]
