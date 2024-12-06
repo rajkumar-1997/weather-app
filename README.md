@@ -49,10 +49,10 @@ $ npm install
 
 ````bash
 
-WEATHER_API_KEY=your-weather-api-key
-LOCATION_API_KEY=your-location-api-key
-THROTTLE_LIMIT=100
-THROTTLE_TTL=60
+IP_STACK_API_KEY=your-api-key
+WEATHER_API_KEY=your-api-key
+NODE_ENV=
+PORT=app-port
 
 
 ## Running the app
