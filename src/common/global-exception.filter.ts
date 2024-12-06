@@ -47,6 +47,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     }
 
+    //log error in winston logger
     this.logger.error({
       level: 'error',
       message: 'exception occurred',

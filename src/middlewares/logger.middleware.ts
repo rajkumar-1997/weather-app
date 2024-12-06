@@ -16,7 +16,13 @@ export class LoggerMiddleware implements NestMiddleware {
       const statusCode = res.statusCode;
       const duration = Date.now() - start;
       const logLevel =
-        statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
+        statusCode >= 500
+          ? 'error'
+          : statusCode == 429
+            ? 'error'
+            : statusCode >= 400
+              ? 'warn'
+              : 'info';
 
       this.logger.log({
         level: logLevel,

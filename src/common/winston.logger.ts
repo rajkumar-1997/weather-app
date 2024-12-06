@@ -22,7 +22,7 @@ export const winstonLoggerConfig = {
       filename: 'error-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       zippedArchive: false, // don't want to zip our logs
-      maxSize: '20m',
+      maxSize: '20m', //maximum file size in mb
       maxFiles: '30d', // will keep log until they are older than 30 days
     }),
 
@@ -31,9 +31,9 @@ export const winstonLoggerConfig = {
       dirname: './logs/info',
       filename: 'app-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
-      zippedArchive: false, // don't want to zip our logs
+      zippedArchive: false,
       maxSize: '20m',
-      maxFiles: '30d', // will keep log until they are older than 30 days
+      maxFiles: '30d',
     }),
   ],
 };

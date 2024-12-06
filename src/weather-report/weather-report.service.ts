@@ -14,24 +14,39 @@ export class WeatherReportService {
     const latitude = ipInfo.latitude;
     const longitude = ipInfo.longitude;
     const city = ipInfo.city;
-
+    const country = ipInfo.country;
     const key = `${city}_Weather_Data`;
-    let weatherData;
+    let aggregatedWeatherData: AggregatedWeatherData;
 
     //fetch data from cache
     const cachedData = await this.cacheService.getValue(key);
     if (cachedData) {
-      weatherData = cachedData;
+      aggregatedWeatherData = cachedData as AggregatedWeatherData;
     } else {
-      weatherData = await this.weatherService.getWeatherInfo(
+      // if data is not in cache then call external weather api
+      const weatherData = await this.weatherService.getWeatherInfo(
         latitude,
         longitude,
       );
 
+      aggregatedWeatherData = {
+        ip,
+        location: {
+          city,
+          country,
+        },
+        weather: {
+          temperature: weatherData.current.temp_c,
+          humidity: weatherData.current.humidity,
+          description:
+            weatherData.current?.condition?.text ?? 'Description not available',
+        },
+      };
+
       // set data in cache
-      await this.cacheService.setValue(key, weatherData, 600);
+      await this.cacheService.setValue(key, aggregatedWeatherData, 600);
     }
 
-    return weatherData;
+    return aggregatedWeatherData;
   }
 }
