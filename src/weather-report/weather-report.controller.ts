@@ -13,7 +13,6 @@ export class WeatherReportController {
   async getWeatherByIp(@Query('ip') ip: string) {
     if (!ip || ip == '') ip = defaultIp;
     else if (!isValidPublicIp(ip)) {
-      console.log('ip', ip);
       throw new BadRequestException('Invalid IP address or private IP');
     }
     const res = await this.weatherReportService.getWeatherByIp(ip);
