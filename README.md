@@ -26,11 +26,34 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+# Weather Report API
+
+This project provides an API that fetches weather information based on a given IP address. It uses third-party services to get the geolocation data and weather information and returns it as a JSON response.
+
+## Setup Instructions
+
+### 1. Clone the Repository:
+
+````bash
+
+git clone https://github.com/rajkumar-1997/weather-app
+cd weather-app
+
 ## Installation
 
 ```bash
 $ npm install
-```
+````
+
+## Sample .env file
+
+````bash
+
+WEATHER_API_KEY=your-weather-api-key
+LOCATION_API_KEY=your-location-api-key
+THROTTLE_LIMIT=100
+THROTTLE_TTL=60
+
 
 ## Running the app
 
@@ -43,7 +66,7 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
+````
 
 ## Test
 
