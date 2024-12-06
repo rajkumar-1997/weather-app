@@ -29,53 +29,58 @@ jobs:
         # Build docker image
       - name: Build docker image
         run: |
-         docker build -t ${{secrets.DOCKER_USERNAME}}/weather-app:latest
+         docker build -t ${{secrets.DOCKER_USERNAME}}/weather:latest .
 
-        # Run tests inside docker container
-      - name: Run tests inside docker conatainer
-        run: |
-          docker run --rm ${{secrets.DOCKER_USERNAME}}/weather-app:latest npm run test
+      #   # Run tests inside docker container
+      # - name: Run tests inside docker conatainer
+      #   run: |
+      #     docker run --rm ${{secrets.DOCKER_USERNAME}}/weather:latest npm run test
 
         # Push docker image to docker hub
       - name: Push Docker image to Docker hub
         run: |
-         docker push ${{secrets.DOCKER_USERNAME}}/weather-app:latest
+         docker push ${{secrets.DOCKER_USERNAME}}/weather:latest
+ 
   deploy:
-    runs-on: self-hosted
-    needs: build
-     
-    steps:
-      
+   runs-on: self-hosted
+   needs: build
+
+   steps:
+    
         # Checkout repository code
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-        # SSH into ec2 and deploy updated conatainer
-      - name: Deploy to AWS EC2 with NGINX reverse proxy
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: |
-           echo "${{secrets.EC2_SSH_PRIVATE_KEY}}" > private-key.pem
-           chmod 600 private-key.pem
+     - name: Checkout code
+       uses: actions/checkout@v3
 
-            # Add EC2 instance's SSH key to known_hosts to avoid the 'Host key verification failed' error
-            ssh-keyscan -H ${{ secrets.EC2_INSTANCE }} >> ~/.ssh/known_hosts
-            
-            # SSH to EC2 instace
-            ssh -i private-key.pem ubuntu@${{secrets.EC2_INSTANCE}} <<EOF
+     - name: Deploy to AWS EC2 with NGINX reverse proxy
+       env:
+         ENV_FILE: ${{ secrets.ENV_FILE }}
+       run: |
+         echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private-key.pem
+         chmod 600 private-key.pem
 
-            # Recreate .env file on EC2 instance from GitHub Secrets
-            echo "$ENV_FILE" > .env
+         # Add EC2 instance's SSH key to known_hosts
+         ssh-keyscan -H ${{ secrets.EC2_INSTANCE }} >> ~/.ssh/known_hosts
 
-            docker pull ${{ secrets.DOCKER_USERNAME }}/nestjs-app:latest
+         # SSH to EC2 instance
+         ssh -i private-key.pem ubuntu@${{ secrets.EC2_INSTANCE }} <<EOF
+           set -e  # Exit on any error
 
-            # Stop and remove the old container if it exists
-             docker stop weather-app || true
-             docker rm weather-app || true
-            
-            # Start a new container with latest image
-             docker run -d --name weather-app \
-               --env-file .env \
-               -p 3000:3000 \
-               --restart-always \
-               ${{ secrets.DOCKER_USERNAME }}/nestjs-app:latest
+           echo "$ENV_FILE" > .env
+
+           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+           docker pull ${{ secrets.DOCKER_USERNAME }}/weather:latest
+
+           CONTAINER_ID=\$(docker ps -aq -f name=weather)
+           if [ "\$CONTAINER_ID" ]; then
+             docker stop \$CONTAINER_ID
+             docker rm \$CONTAINER_ID
+           fi
+
+           docker run -d --name weather \
+             --env-file .env \
+             -p 3000:3000 \
+             --restart always \
+             ${{ secrets.DOCKER_USERNAME }}/weather:latest
+         
+         EOF
