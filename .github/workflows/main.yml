@@ -1,0 +1,81 @@
+name: weather  report application
+
+on:
+ #event
+ push:
+   branches:
+     - master
+  
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+        
+        # Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+        # Setup docker buildx for building docker images
+      - name: Setup docker buildx
+        uses: docker/setup-buildx-action@v3
+        
+        # Setup docker for workflow
+      - name: Login to docker
+        uses:  docker/login-action@v3
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+        
+        # Build docker image
+      - name: Build docker image
+        run: |
+         docker build -t ${{secrets.DOCKER_USERNAME}}/weather-app:latest
+
+        # Run tests inside docker container
+      - name: Run tests inside docker conatainer
+        run: |
+          docker run --rm ${{secrets.DOCKER_USERNAME}}/weather-app:latest npm run test
+
+        # Push docker image to docker hub
+      - name: Push Docker image to Docker hub
+        run: |
+         docker push ${{secrets.DOCKER_USERNAME}}/weather-app:latest
+  deploy:
+    runs-on: self-hosted
+    needs: build
+     
+    steps:
+      
+        # Checkout repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+        # SSH into ec2 and deploy updated conatainer
+      - name: Deploy to AWS EC2 with NGINX reverse proxy
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+           echo "${{secrets.EC2_SSH_PRIVATE_KEY}}" > private-key.pem
+           chmod 600 private-key.pem
+
+            # Add EC2 instance's SSH key to known_hosts to avoid the 'Host key verification failed' error
+            ssh-keyscan -H ${{ secrets.EC2_INSTANCE }} >> ~/.ssh/known_hosts
+            
+            # SSH to EC2 instace
+            ssh -i private-key.pem ubuntu@${{secrets.EC2_INSTANCE}} <<EOF
+
+            # Recreate .env file on EC2 instance from GitHub Secrets
+            echo "$ENV_FILE" > .env
+
+            docker pull ${{ secrets.DOCKER_USERNAME }}/nestjs-app:latest
+
+            # Stop and remove the old container if it exists
+             docker stop weather-app || true
+             docker rm weather-app || true
+            
+            # Start a new container with latest image
+             docker run -d --name weather-app \
+               --env-file .env \
+               -p 3000:3000 \
+               --restart-always \
+               ${{ secrets.DOCKER_USERNAME }}/nestjs-app:latest

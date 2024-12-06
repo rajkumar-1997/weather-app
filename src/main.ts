@@ -10,6 +10,6 @@ async function bootstrap() {
   });
   const logger = app.get<Logger>('winston');
   app.useGlobalFilters(new GlobalExceptionFilter(logger));
-  await app.listen(3000);
+  await app.listen(process.env.PORT);
 }
 bootstrap();

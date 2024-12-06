@@ -15,10 +15,19 @@ import { HealthModule } from './health/health.module';
 import { HttpModule } from '@nestjs/axios';
 import { MetricsMiddleware } from './middlewares/metrics.middleware';
 import { MetricsModule } from './metrics/metrics.module';
+import { envValidationSchema } from './utils/env-validation-schema';
+import { abort } from 'process';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        abortEarly: true,
+        allowUnkown: false,
+      },
+    }),
     ThrottlerModule.forRoot([{ ttl: 0, limit: 0 }]),
     WinstonModule.forRoot(winstonLoggerConfig),
     CacheModule.register({
