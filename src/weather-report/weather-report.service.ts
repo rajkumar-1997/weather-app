@@ -18,7 +18,7 @@ export class WeatherReportService {
     const key = `${city}_Weather_Data`;
     let aggregatedWeatherData: AggregatedWeatherData;
 
-    //fetch data from cache
+    //fetch data from cache if available
     const cachedData = await this.cacheService.getValue(key);
     if (cachedData) {
       aggregatedWeatherData = cachedData as AggregatedWeatherData;
